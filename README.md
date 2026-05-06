@@ -1,6 +1,3 @@
-Aşağıdaki metni doğrudan GitHub’da `README.md` olarak ekleyebilirsin.
-
-````markdown
 # Transformation-Aware Solubility
 
 Transformation-aware ensemble modeling for temperature-dependent solubility prediction under solute–solvent generalization constraints.
@@ -37,7 +34,7 @@ transformation-aware-solubility/
 ├── Step_1_4_sentetik_features.py
 ├── Step_2_stacking_unseen_pair.py
 └── README.md
-````
+
 
 ## Files
 
