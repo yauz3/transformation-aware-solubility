@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Sensitivity of the primary unseen-pair result to removal of post hoc InChIKey-overlap test records. Metrics were recomputed using the same five-fold averaged operational prediction vector after excluding the 39 test records involved in identity-collapsed InChIKey-pair overlap.}
+\label{tab:supp_inchikey_sensitivity}
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{Evaluation set}
+& \textbf{Test n}
+& \textbf{Removed n}
+& $\mathbf{R^2_{\mathrm{LogS}}}$
+& \textbf{MAE$_{\mathrm{LogS}}$}
+& \textbf{RMSE$_{\mathrm{LogS}}$}
+& $\mathbf{R^2_{S}}$
+& \textbf{MAE$_S$}
+& \textbf{RMSE$_S$} \\
+\midrule
+Original unseen-pair test set & 20,133 & 0 & 0.843 & 0.313 & 0.484 & 0.542 & 0.538 & 2.720 \\
+After excluding InChIKey-overlap test rows & 20,094 & 39 & 0.843 & 0.313 & 0.484 & 0.542 & 0.538 & 2.722 \\
+\bottomrule
+\end{tabular}
+\end{table}

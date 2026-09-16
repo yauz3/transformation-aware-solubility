@@ -165,3 +165,23 @@ Additional packages may be required depending on the descriptor-generation workf
 This repository is released for academic and research use. Please check the license file or contact the authors for additional usage conditions.
 
 
+
+---
+
+## Final dataset and reproducibility package
+
+The final dataset and reproducibility materials used in the revised manuscript are available in this repository.
+
+Key folders:
+
+- `data/raw/`
+- `data/processed_splits/`
+- `results/split_audit/`
+- `results/chemical_identity_audit/`
+- `results/repeatability_ceiling/`
+- `results/validation_rerun/`
+- `code/audit/`
+- `code/splits/`
+- `manifests/SHA256SUMS.txt`
+
+See [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md) for details.

@@ -1,0 +1,11 @@
+\begin{tabular}{lrrrlrrrrrrrrrrr}
+\toprule
+split & random_seed & intended_test_fraction & achieved_test_fraction & outer_grouping & train_rows & test_rows & train_solutes & test_solutes & train_solvents & test_solvents & train_pairs & test_pairs & heldout_test_solutes & heldout_test_solvents & shared_pairs \\
+\midrule
+Random split & 42 & 0.200 & 0.200 & rows & 80786 & 20197 & 1439 & 1374 & 70 & 70 & 10785 & 9027 & 6 & 0 & 8957 \\
+Unseen-pair split & 42 & 0.200 & 0.199 & solute--solvent pair & 80850 & 20133 & 1415 & 1015 & 70 & 67 & 8684 & 2171 & 30 & 0 & 0 \\
+Strict unseen-solute split & 42 & 0.200 & 0.202 & solute & 80542 & 20441 & 1156 & 289 & 70 & 68 & 8624 & 2231 & 289 & 0 & 0 \\
+Strict unseen-solvent split & 42 & 0.200 & 0.195 & solvent & 81315 & 19668 & 1441 & 985 & 56 & 14 & 8753 & 2102 & 4 & 14 & 0 \\
+Fully unseen solute--solvent split & 42 & 0.200 & 0.041 & solute and solvent components & 68465 & 2952 & 1106 & 220 & 56 & 13 & 7245 & 350 & 220 & 13 & 0 \\
+\bottomrule
+\end{tabular}

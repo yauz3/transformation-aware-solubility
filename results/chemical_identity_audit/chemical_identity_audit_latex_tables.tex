@@ -1,0 +1,72 @@
+% Exclusion accounting summary
+
+\begin{tabular}{rrrrrr}
+\toprule
+initial_raw_records & model_ready_records & excluded_records_by_multiset_difference & raw_records_with_missing_LogS & raw_records_with_missing_solubility_mol_L & raw_records_with_dash_solvent_smiles \\
+\midrule
+103944 & 100983 & 2963 & 2961 & 2961 & 299 \\
+\bottomrule
+\end{tabular}
+
+
+% Exclusion accounting table
+
+\begin{tabular}{lr}
+\toprule
+exclusion_category & n_records \\
+\midrule
+missing_or_invalid_LogS & 2961 \\
+missing_or_invalid_solubility_mol_L & 2961 \\
+missing_or_invalid_solvent_smiles & 299 \\
+other_model_readiness_or_descriptor_preprocessing_difference & 2 \\
+\bottomrule
+\end{tabular}
+
+
+% Chemical identity audit summary
+
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+component_role & rows & unique_raw_smiles & valid_smiles_rows & invalid_or_missing_smiles_rows & unique_canonical_smiles & unique_inchikey & components_with_multiple_raw_smiles_same_canonical & max_raw_smiles_per_canonical & disconnected_structure_rows & unique_disconnected_canonical_components \\
+\midrule
+solute & 100983 & 1445 & 100983 & 0 & 1445 & 1444 & 0 & 1 & 8975 & 177 \\
+solvent & 100983 & 70 & 100983 & 0 & 70 & 70 & 0 & 1 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+
+
+% Canonical identity leakage audit
+
+\begin{tabular}{llrrrrrrrrrlll}
+\toprule
+split & expected_rule & raw_shared_solutes & raw_shared_solvents & raw_shared_pairs & canonical_shared_solutes & canonical_shared_solvents & canonical_shared_pairs & inchikey_shared_solutes & inchikey_shared_solvents & inchikey_shared_pairs & canonical_pair_leakage_passed & canonical_solute_exclusion_passed & canonical_solvent_exclusion_passed \\
+\midrule
+random & overlap_allowed & 1368 & 70 & 8957 & 1368 & 70 & 8957 & 1367 & 70 & 8953 &  &  &  \\
+unseen_pair & no_pair_overlap & 985 & 67 & 0 & 985 & 67 & 0 & 984 & 67 & 3 & True &  &  \\
+strict_unseen_solute & no_solute_overlap & 0 & 68 & 0 & 0 & 68 & 0 & 0 & 68 & 0 & True & True &  \\
+strict_unseen_solvent & no_solvent_overlap & 981 & 0 & 0 & 981 & 0 & 0 & 980 & 0 & 0 & True &  & True \\
+fully_unseen_solute_solvent & no_solute_or_solvent_overlap & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & True & True & True \\
+\bottomrule
+\end{tabular}
+
+
+% Solvent identity one-to-one audit
+
+\begin{tabular}{rrrrrr}
+\toprule
+unique_solvent_names_model_ready & unique_raw_solvent_smiles_model_ready & unique_canonical_solvent_smiles_model_ready & names_with_multiple_canonical_structures & canonical_structures_with_multiple_names & one_to_one_name_structure \\
+\midrule
+70 & 70 & 70 & 0 & 0 & True \\
+\bottomrule
+\end{tabular}
+
+
+% Polymer / mixture / salt-like summary
+
+\begin{tabular}{lrrr}
+\toprule
+component_role & flag_polymer_or_mixture_like_name & flag_disconnected_or_salt_like_smiles & n_rows \\
+\midrule
+solute & False & True & 8975 \\
+\bottomrule
+\end{tabular}
