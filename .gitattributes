@@ -11,3 +11,6 @@
 *.pth filter=lfs diff=lfs merge=lfs -text
 *.part filter=lfs diff=lfs merge=lfs -text
 *.json filter=lfs diff=lfs merge=lfs -text
+data/processed_splits/repeated_component_resampling/*/*.csv filter=lfs diff=lfs merge=lfs -text
+data/processed_splits/repeated_component_resampling/*/*.chunks/*.part filter=lfs diff=lfs merge=lfs -text
+data/processed_splits/repeated_component_resampling/*/*.chunks/*.part-* filter=lfs diff=lfs merge=lfs -text

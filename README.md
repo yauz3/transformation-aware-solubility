@@ -51,177 +51,80 @@ transformation-aware-solubility/
 ├── code/
 │   ├── audit/
 │   └── splits/
-├── manifests/
-│   └── SHA256SUMS.txt
-├── Step_0_group_pair_split_data.py
-├── Step_1_1_maccs_fp_features.py
-├── Step_1_2-MAP4.py
-├── Step_1_3-chemprop.py
-├── Step_1_4_sentetik_features.py
-└── Step_2_stacking_unseen_pair.py
+└── manifests/
+    └── SHA256SUMS.txt
 ```
 
-See [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md) for the reproducibility package layout and reconstruction instructions for large split files.
+See [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md) for the complete package layout and reconstruction instructions for large split files.
 
-## Main Evaluation Regimes
+## Evaluation Regimes
 
-### 1. Random split
-
-Random splitting is retained only as an interpolation-oriented reference. Solutes, solvents, and complete solute--solvent pairs can overlap between train and test partitions.
-
-### 2. Unseen solute--solvent pair split
-
-Each complete solute--solvent pair is assigned exclusively to either training or testing. Individual solutes and solvents can still appear in both partitions when paired with different counterpart components.
-
-This is the primary application-relevant split used for the main baseline, feature ablation, target-transformation screening, and post hoc ensemble diagnostics.
-
-### 3. Strict unseen-solute split
-
-All test solutes are absent from training. Solvents may remain shared across partitions.
-
-### 4. Strict unseen-solvent split
-
-All test solvents are absent from training. Solutes may remain shared across partitions.
-
-### 5. Fully unseen solute--solvent split
-
-Both test solutes and test solvents are absent from training. Mixed-status records are excluded from model fitting and final testing for this diagnostic split and are retained separately for audit purposes.
+1. **Random split** — interpolation-oriented reference.
+2. **Unseen solute--solvent pair split** — complete pairs are disjoint between train and test; this is the primary application-relevant setting.
+3. **Strict unseen-solute split** — all test solutes are absent from training.
+4. **Strict unseen-solvent split** — all test solvents are absent from training.
+5. **Fully unseen solute--solvent split** — both test components are absent from training.
 
 ## Repeated Strict Component Selection
 
-The seed-42 strict unseen-solute and strict unseen-solvent splits are retained as the primary fixed stress tests. To assess sensitivity to the specific held-out components, the strict splits were additionally regenerated using outer component-selection seeds **7** and **123** while retaining the same source data, feature matrix, split definitions, architecture, optimization settings, and operational prediction procedure.
+The seed-42 strict unseen-solute and strict unseen-solvent splits are retained as the primary fixed stress tests. Additional outer component-selection seeds **7** and **123** were used to assess sensitivity to the particular held-out components while keeping the source data, feature matrix, split definitions, architecture, optimization settings, preprocessing, and operational prediction procedure fixed.
 
-The repeated split CSVs are provided under:
+Repeated split CSVs are available under:
 
 ```text
 data/processed_splits/repeated_component_resampling/
 ```
 
-with separate folders for:
-
-```text
-strict_unseen_solute_seed7/
-strict_unseen_solvent_seed7/
-strict_unseen_solute_seed123/
-strict_unseen_solvent_seed123/
-```
-
-The Direct LogS repeated analysis produced valid operational predictions for all three unseen-solute selections and for unseen-solvent seeds 7 and 42. The seed-123 unseen-solvent partition exposed an extreme descriptor-space numerical out-of-distribution condition under the predefined preprocessing and mixed-precision inference pipeline. That replicate is retained as a documented numerical failure; no seed-specific clipping, descriptor deletion, or variance filtering was introduced after observing the held-out partition.
+The Direct LogS repeated analysis produced valid operational predictions for all three unseen-solute selections and for unseen-solvent seeds 7 and 42. The seed-123 unseen-solvent partition exposed an extreme descriptor-space numerical out-of-distribution condition under the predefined preprocessing and mixed-precision inference pipeline. The split is retained for reproducibility and no seed-specific corrective preprocessing was introduced after observing the held-out partition.
 
 ## Large Split Files
 
-Several model-ready training CSVs exceed the practical per-object size used in this repository. Large training CSVs are therefore stored as ordered Git LFS chunks in a companion `.chunks/` directory.
-
-For example:
-
-```bash
-cat \
-  data/processed_splits/repeated_component_resampling/strict_unseen_solute_seed7/\
-train_strict_unseen_solute_maccs_map4_padel_sen_features.csv.chunks/\
-train_strict_unseen_solute_maccs_map4_padel_sen_features.csv.part-* \
-> train_strict_unseen_solute_maccs_map4_padel_sen_features.csv
-```
-
-The reconstructed file can be verified against `manifests/SHA256SUMS.txt`.
+Large training matrices are stored as ordered Git LFS chunks in `<filename>.chunks/` directories. Reconstruct them by concatenating the chunk files in lexical order and verify the result against the accompanying SHA256 file.
 
 Test CSVs are stored directly through Git LFS.
 
-## Molecular Representation
-
-The feature space combines:
-
-- MACCS fingerprints;
-- MAP4 fingerprints;
-- PaDEL / physicochemical descriptors;
-- solute-side descriptors;
-- solvent-side descriptors;
-- temperature and temperature-derived variables;
-- engineered solute--solvent interaction features.
+See `data/processed_splits/repeated_component_resampling/RECONSTRUCT.md`.
 
 ## Model Training
 
-The canonical neural-learning pipeline uses a fully connected MLP with:
+The canonical MLP pipeline uses:
 
 - hidden layers `[4096, 2048, 1024, 512, 256, 128, 64, 32]`;
 - ReLU activations;
 - batch normalization;
 - dropout = 0.15;
-- AdamW optimization;
+- AdamW;
 - learning rate = `1e-3`;
 - weight decay = `1e-5`;
 - batch size = 1024;
 - maximum 100 epochs;
 - early stopping patience = 7;
-- MAE training loss;
+- MAE loss;
 - train-only `StandardScaler`;
 - 5-fold group-aware internal validation;
-- CUDA AMP mixed precision in the canonical runs.
+- CUDA AMP mixed precision.
 
-Principal metrics are computed from the final fold-averaged operational prediction vector. Fold-model mean ± SD values are retained only as diagnostics of model-to-model variability within one fixed outer split.
+Principal metrics are computed from the final fold-averaged operational prediction vector. Fold-model mean ± SD values are secondary diagnostics of model-to-model variability within one fixed outer split.
 
-## Target-Transformation Analysis
+## Target-Transformation and Ensemble Diagnostics
 
-Fourteen target representations were evaluated, including:
+Fourteen target representations were screened. Transformation-specific predictions were mapped to common LogS and raw-solubility evaluation spaces where defined.
 
-- Direct LogS;
-- Direct solubility;
-- square-root and cube-root transformations;
-- logarithmic transformations;
-- inverse and negative-log transformations;
-- fractional and power-law transformations;
-- asinh transformation;
-- quantile-normal and quantile-uniform mappings;
-- Box--Cox where valid.
-
-Target representations are compared in their native spaces and, where defined, after mapping to common LogS and raw-solubility spaces.
-
-## Post Hoc Ensemble Analysis
-
-Transformation-specific operational prediction vectors can be averaged after mapping to a common evaluation space. Candidate transformation subsets were examined after evaluation on the fixed test set; therefore, these ensemble comparisons are **post hoc diagnostics** and should not be interpreted as independently selected deployment estimates.
-
-A transformation subset intended for deployment should be selected using an independent validation procedure or nested cross-validation and then evaluated once on an untouched test set.
+Transformation-ensemble subsets were evaluated post hoc on the fixed test set. They are therefore reported as empirical upper-envelope diagnostics, not as independently selected deployment models.
 
 ## Reproducibility Outputs
 
-Important outputs include:
+The repository includes split audits, held-out component manifests, target-distribution diagnostics, chemical-identity audits, repeatability analyses, repeated component-selection summaries, validation predictions, and target-transformation outputs.
 
-- split construction summaries;
-- held-out component manifests;
-- train--test leakage checks;
-- target-distribution diagnostics;
-- chemical-identity audits using raw SMILES, RDKit canonical SMILES, and InChIKey;
-- InChIKey-overlap sensitivity analyses;
-- repeatability-based ceiling analyses;
-- repeated strict component-selection summaries;
-- fold-specific and operational prediction outputs;
-- target-transformation validation results.
-
-File integrity checks are provided in:
+File integrity information is provided in:
 
 ```text
 manifests/SHA256SUMS.txt
 ```
 
-## Requirements
-
-The workflow may require:
-
-```text
-pandas
-numpy
-scikit-learn
-rdkit
-torch
-matplotlib
-scipy
-joblib
-```
-
-Additional packages may be required for MAP4-, PaDEL-, or ChemProp-related descriptor-generation steps.
-
 ## Citation
 
-If you use this repository, please cite the associated manuscript:
+If you use this repository, please cite:
 
 ```text
 Ugurlu, S. Y.; He, S.
@@ -233,6 +136,4 @@ Please also cite BigSolDB 2.0 when using the underlying experimental solubility 
 
 ## Data Availability
 
-The raw experimental solubility data are derived from BigSolDB 2.0. Processed splits, repeated component-selection partitions, split-audit outputs, validation summaries, prediction outputs, and analysis code used in the revised manuscript are provided in this repository.
-
-See [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md) for details.
+See [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md).

@@ -13,13 +13,13 @@ This repository contains the final dataset, processed split files, split-audit o
   Final model-ready train/test split files used for random, unseen-pair, strict unseen-solute, strict unseen-solvent, and fully unseen solute--solvent evaluation.
 
 - `data/processed_splits/repeated_component_resampling/`  
-  Additional strict component-selection partitions used for the outer-seed sensitivity analysis:
+  Additional strict component-selection partitions for outer seeds 7 and 123:
   - `strict_unseen_solute_seed7/`
   - `strict_unseen_solvent_seed7/`
   - `strict_unseen_solute_seed123/`
   - `strict_unseen_solvent_seed123/`
 
-  Each folder contains the corresponding held-out test CSV and the model-ready training split. Large training CSVs are stored as ordered Git LFS chunks under `<filename>.chunks/` and can be reconstructed by concatenating the chunk files in lexical order.
+  Large training CSVs are stored as ordered Git LFS chunks under `<filename>.chunks/`. The corresponding held-out test CSVs are stored directly through Git LFS.
 
 - `results/split_audit/`  
   Split-construction audit outputs, including held-out component counts, train/test overlap checks, target-distribution diagnostics, and split manifests.
@@ -44,46 +44,38 @@ This repository contains the final dataset, processed split files, split-audit o
 
 ## Repeated strict component-selection design
 
-The seed-42 strict unseen-solute and strict unseen-solvent splits are retained as the primary fixed component-level stress tests. Additional outer component-selection seeds **7** and **123** were used to quantify sensitivity to the particular solutes or solvents held out for testing.
+The seed-42 strict unseen-solute and strict unseen-solvent splits are retained as the primary fixed component-level stress tests. Additional outer component-selection seeds **7** and **123** were used to assess sensitivity to the particular solutes or solvents held out for testing.
 
-Only the outer component-selection seed was changed. The source data, descriptor matrix, split definition, model architecture, optimization settings, preprocessing rules, and operational prediction procedure were otherwise held fixed.
+Only the outer component-selection seed was changed. The source data, descriptor matrix, split definition, architecture, optimization settings, preprocessing rules, and operational prediction procedure were otherwise held fixed.
 
 Direct LogS produced valid operational predictions for:
 
 - strict unseen-solute: seeds 7, 42, and 123;
 - strict unseen-solvent: seeds 7 and 42.
 
-The strict unseen-solvent seed-123 split generated non-finite held-out predictions under the predefined mixed-precision inference pipeline because the held-out partition produced an extreme descriptor-space out-of-distribution condition after train-only standardization. The split itself is retained and distributed for reproducibility. No seed-specific clipping, feature deletion, or variance filtering was introduced after observing this partition.
+The strict unseen-solvent seed-123 partition generated non-finite held-out predictions under the predefined mixed-precision inference pipeline after an extreme descriptor-space out-of-distribution condition emerged under train-only standardization. The split itself is retained and distributed for reproducibility. No seed-specific clipping, feature deletion, or variance filtering was introduced after observing this partition.
 
 ## Reconstructing large training CSVs
 
-Large training CSVs are stored as ordered chunks so that individual Git LFS objects remain manageable.
-
-Example:
+For any repeated-split condition:
 
 ```bash
-DIR="data/processed_splits/repeated_component_resampling/strict_unseen_solute_seed7"
+cd data/processed_splits/repeated_component_resampling/<condition>
+
 NAME="train_strict_unseen_solute_maccs_map4_padel_sen_features.csv"
+cat "$NAME.chunks/$NAME".part-* > "$NAME"
 
-cat "$DIR/$NAME.chunks/$NAME".part-* > "$DIR/$NAME"
+sha256sum -c "$NAME.sha256"
 ```
 
-Equivalent reconstruction applies to the other repeated strict-split training files.
-
-After reconstruction, verify the file against:
-
-```text
-manifests/SHA256SUMS.txt
-```
+For unseen-solvent folders, replace `solute` with `solvent` in `NAME`.
 
 Test split CSVs are stored directly through Git LFS.
 
 ## Notes
 
-The Direct LogS model is retained as the primary prospective baseline for logarithmic or relative-solubility prediction. Direct raw-solubility prediction is the principal single-target comparator when absolute mol/L accuracy is the intended endpoint.
+Direct LogS is retained as the primary prospective baseline for logarithmic or relative-solubility prediction. Direct raw-solubility prediction is the principal single-target comparator when absolute mol/L accuracy is the intended endpoint.
 
-Post hoc transformation-ensemble results are provided as diagnostic empirical upper-envelope analyses and should not be interpreted as independently selected deployment models.
+Post hoc transformation-ensemble results are diagnostic empirical upper-envelope analyses and should not be interpreted as independently selected deployment models.
 
 The chemical-identity audit uses the SMILES identifiers present in the BigSolDB-derived modeling file as the original operational split identifiers and adds post hoc RDKit canonical-SMILES and InChIKey checks where possible.
-
-The repeated strict component-selection materials are included so that the component-selection sensitivity analysis and the seed-123 unseen-solvent numerical failure can be independently inspected and reproduced.
